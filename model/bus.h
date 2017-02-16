@@ -4,11 +4,18 @@
 #include <stdio.h>
 
 struct branch {
+	// Barra de saida
   int m_ni;
+  // Barra de chegada
   int m_nf;
   int m_area;
   int m_zona;
   int m_circ;
+  /* Tipo de barras
+   * 3 = Slack
+   * 2 = PV
+   * 0 = PQ
+   */
   int m_tipo;
   int m_ordtap;
   int m_postap;
@@ -41,9 +48,13 @@ struct bus {
 	int m_tipo;
 	double m_v;
 	double m_ang;
+	// Potência ativa consumida
 	double m_pc;
+	// Potência reativa consumida
 	double m_qc;
+	// Potência ativa gerada
 	double m_pg;
+	// Potência reativa gerada
 	double m_qg;
 	double m_base_kV;
 	double m_vg_o;
@@ -56,9 +67,12 @@ struct bus {
 	double m_crt;
 	int m_ctrl_rem;
 	int m_ordPV;
+	// Índice de barra PV
 	int m_posPV;
 	int m_ordPQ;
+	// Índice de barra PQ
 	int m_posPQ;
+	// Indice associada a todas as barras que não são slack
 	int m_ord;
 	Branch_t * branch;
 };
