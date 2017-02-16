@@ -3,6 +3,12 @@
 
 #include <stdio.h>
 
+#define MAX 10
+#define NUM_BUS 50
+#define SLACK 3
+#define PV 2
+#define PV 0
+
 struct branch {
 	// Barra de saida
   int m_ni;
@@ -41,6 +47,7 @@ typedef struct branch Branch_t;
 
 struct bus {
 	int m_nex;
+	// Identificador da barra
 	int m_nin;
 	char * m_nome;
 	double m_area;
@@ -74,8 +81,34 @@ struct bus {
 	int m_posPQ;
 	// Indice associada a todas as barras que não são slack
 	int m_ord;
-	Branch_t * branch;
+	Branch_t branch[MAX];
 };
 typedef struct bus Bus_t;
+
+Bus_t busesV[NUM_BUS];
+
+// Protótipos
+void criarBarra(int nin, int tipo, double v, double ang,
+								double pc, double qc, double pg, double qg);
+
+void ligarBarras(Bus_t busK, Bus_t busM);
+
+// Definição de métodos
+void criarBarra(int nin, int tipo, double v, double ang,
+		double pc, double qc, double pg, double qg) {
+	Bus_t bus;
+
+	bus.m_nin = nin;
+	bus.m_tipo = tipo;
+	bus.m_v = v;
+	bus.m_ang = ang;
+	bus.m_pc = pc;
+	bus.m_qc = qc;
+	bus.m_pg = pg;
+	bus.m_qg = qg;
+
+	int n = sizeof(busesV)/sizeof(busesV[0]);
+	busesV[n] = bus;
+}
 
 #endif /* BUS_H_ */
