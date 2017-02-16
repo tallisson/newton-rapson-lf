@@ -3,6 +3,35 @@
 
 #include <stdio.h>
 
+struct branch {
+  int m_ni;
+  int m_nf;
+  int m_area;
+  int m_zona;
+  int m_circ;
+  int m_tipo;
+  int m_ordtap;
+  int m_postap;
+  double m_r;
+  double m_x;
+  double m_bsh;
+  double m_line_rating1;
+  double m_line_rating2;
+  double m_line_rating3;
+  double m_t_ctrl;
+  double m_side;
+  double m_tap;
+  double m_def;
+  double m_tapmin;
+  double m_tapmax;
+  double m_passo;
+  double m_ctrl_min;
+  double m_ctrl_max;
+  double m_g;
+  double m_b;
+};
+typedef struct branch Branch_t;
+
 struct bus {
 	int m_nex;
 	int m_nin;
@@ -31,6 +60,7 @@ struct bus {
 	int m_ordPQ;
 	int m_posPQ;
 	int m_ord;
+	Branch_t * branch;
 };
 typedef struct bus Bus_t;
 
