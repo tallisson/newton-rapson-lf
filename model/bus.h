@@ -9,6 +9,9 @@
 #define PV 2
 #define PQ 0
 
+// Branch => linha de transmissão
+#define LT 0
+
 struct branch {
 	// Barra de saida
   int m_ni;
@@ -90,6 +93,12 @@ typedef struct bus Bus_t;
 Bus_t busesV[NUM_BUS];
 int contBus = 0;
 
+// Protótipos
+void criarBarra(int nin, int tipo, double v, double ang,
+		double pc, double qc, double pg, double qg);
+
+void associarBarras(int indBusk, int indBusM, int tipo, int r, int x, int bsh);
+
 // Definição de métodos
 void criarBarra(int nin, int tipo, double v, double ang,
 		double pc, double qc, double pg, double qg) {
@@ -116,14 +125,16 @@ void associarBarras(int indBusk, int indBusM, int tipo, int r, int x, int bsh) {
 	branch.m_r = r;
 	branch.m_x = x;
 	branch.m_g = r/(r*r+x*x);
-	branch.m_b = -x/(r*r_x*x);
+	branch.m_b = -x/(r*r+x*x);
 	branch.m_bsh = bsh;
 
-	Bus_t busK = busesV[indBusk];
+	Bus_t busK = busesV[indBusk-1];
 	busK.m_branches[busK.m_numBranches++] = branch;
+	busesV[indBusk-1] = busK;
 
-	Bus_t busM = busesV[indBusM];
-	busM.m_branches[busM.m_numBranches] = branhc;
+	Bus_t busM = (busesV[indBusM-1]);	
+	busM.m_branches[busM.m_numBranches++] = branch;
+	busesV[indBusM-1] = busM;
 }
 
 #endif /* BUS_H_ */
