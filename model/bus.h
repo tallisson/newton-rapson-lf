@@ -17,11 +17,7 @@ struct branch {
   int m_area;
   int m_zona;
   int m_circ;
-  /* Tipo de barras
-   * 3 = Slack
-   * 2 = PV
-   * 0 = PQ
-   */
+  //Tipo de branches   
   int m_tipo;
   int m_ordtap;
   int m_postap;
@@ -52,6 +48,11 @@ struct bus {
 	char * m_nome;
 	double m_area;
 	double m_zona;
+	/* Tipo de barras
+	 * 3 = Slack
+   	 * 2 = PV
+   	 * 0 = PQ
+   	 */
 	int m_tipo;
 	double m_v;
 	double m_ang;
@@ -81,7 +82,8 @@ struct bus {
 	int m_posPQ;
 	// Indice associada a todas as barras que não são slack
 	int m_ord;
-	Branch_t branch[MAX];
+	Branch_t m_branches[MAX];
+	int m_numBranches;
 };
 typedef struct bus Bus_t;
 
@@ -101,8 +103,27 @@ void criarBarra(int nin, int tipo, double v, double ang,
 	bus.m_qc = qc;
 	bus.m_pg = pg;
 	bus.m_qg = qg;
+	bus.m_numBranches = 0;
 
 	busesV[contBus++] = bus;
+}
+
+void associarBarras(int indBusk, int indBusM, int tipo, int r, int x, int bsh) {
+	Branch_t branch;
+	branch.m_ni = indBusk;
+	branch.m_nf = indBusM;
+	branch.m_tipo = tipo;
+	branch.m_r = r;
+	branch.m_x = x;
+	branch.m_g = r/(r*r+x*x);
+	branch.m_b = -x/(r*r_x*x);
+	branch.m_bsh = bsh;
+
+	Bus_t busK = busesV[indBusk];
+	busK.m_branches[busK.m_numBranches++] = branch;
+
+	Bus_t busM = busesV[indBusM];
+	busM.m_branches[busM.m_numBranches] = branhc;
 }
 
 #endif /* BUS_H_ */
