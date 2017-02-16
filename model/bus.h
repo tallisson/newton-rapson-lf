@@ -7,7 +7,7 @@
 #define NUM_BUS 50
 #define SLACK 3
 #define PV 2
-#define PV 0
+#define PQ 0
 
 struct branch {
 	// Barra de saida
@@ -86,12 +86,7 @@ struct bus {
 typedef struct bus Bus_t;
 
 Bus_t busesV[NUM_BUS];
-
-// Protótipos
-void criarBarra(int nin, int tipo, double v, double ang,
-								double pc, double qc, double pg, double qg);
-
-void ligarBarras(Bus_t busK, Bus_t busM);
+int contBus = 0;
 
 // Definição de métodos
 void criarBarra(int nin, int tipo, double v, double ang,
@@ -107,8 +102,7 @@ void criarBarra(int nin, int tipo, double v, double ang,
 	bus.m_pg = pg;
 	bus.m_qg = qg;
 
-	int n = sizeof(busesV)/sizeof(busesV[0]);
-	busesV[n] = bus;
+	busesV[contBus++] = bus;
 }
 
 #endif /* BUS_H_ */
