@@ -8,6 +8,7 @@
 #define SLACK 3
 #define PV 2
 #define PQ 0
+#define PV_TO_PQ 4
 
 // Branch => linha de transmissão
 #define LT 0

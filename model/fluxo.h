@@ -38,9 +38,33 @@ void derivaP(double ** jac) {
 				double vM = busM.m_v;				
 				int k = busK.m_ord;
 
-				// Calcular Dp[k,k]
+				// dPk em relação a 'ak'
 				jac[k][k] += -1 * vK * vM * 
 								(dataBranch.m_g * sin (theta_km) - dataBranch.m_b * cos (theta_km));
+				
+				// dPk em relação a 'am' (exceto quando m for a barra slack).								
+				if (busM->GetType () != Bus::SLACK)
+					{
+						int m = busM.m_ord;
+						jac[k][m] += vK * vM *
+												( dataBranch.m_g * sin (theta_km) - dataBranch.m_b * cos (theta_km) )
+					}
+
+				// dPk em relação a 'vk'
+				if (busK.m_tipo == PQ || busK.m_tipo == PV_TO_PQ) {
+					int index = contBus - 1 + busK.m_ordPQ;
+					jac [k][index] += -2 * dataBranch.m_g * vK.Get () +
+														vM.Get () *
+														(dataBranch.m_g * cos (theta_km) + dataBranch.m_b * sin(theta_km));
+				}
+
+				// dPk em relação a 'vm'
+				if (busM.m_tipo == PQ || busM.m_tipo == PV_TO_PQ) {
+						int index = contBus - 1 + busM.m_ordPQ;
+						jac [k][index] += vK * ( dataBranch.m_g * cos (theta_km) + dataBranch.m_b * sin (theta_km) );
+				}
+
+
 			}
 		}
 	}
