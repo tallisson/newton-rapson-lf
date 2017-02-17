@@ -43,19 +43,18 @@ void derivaP(double ** jac) {
 								(dataBranch.m_g * sin (theta_km) - dataBranch.m_b * cos (theta_km));
 				
 				// dPk em relação a 'am' (exceto quando m for a barra slack).								
-				if (busM->GetType () != Bus::SLACK)
+				if (busM.m_tipo != SLACK)
 					{
 						int m = busM.m_ord;
 						jac[k][m] += vK * vM *
-												( dataBranch.m_g * sin (theta_km) - dataBranch.m_b * cos (theta_km) )
+												( dataBranch.m_g * sin (theta_km) - dataBranch.m_b * cos (theta_km) );
 					}
 
 				// dPk em relação a 'vk'
 				if (busK.m_tipo == PQ || busK.m_tipo == PV_TO_PQ) {
 					int index = contBus - 1 + busK.m_ordPQ;
-					jac [k][index] += -2 * dataBranch.m_g * vK.Get () +
-														vM.Get () *
-														(dataBranch.m_g * cos (theta_km) + dataBranch.m_b * sin(theta_km));
+					jac [k][index] += -2 * dataBranch.m_g * vK +
+														vM * (dataBranch.m_g * cos (theta_km) + dataBranch.m_b * sin(theta_km));
 				}
 
 				// dPk em relação a 'vm'
@@ -71,7 +70,59 @@ void derivaP(double ** jac) {
 }
 
 void derivarQ(double ** jac) {
-	
+	for(int i = 0; i < contBus; i++) {
+		Bus_t busK = busesV[i];
+
+		if(busK.m_tipo == PQ || busK.m_tipo == PV_TO_PQ) {
+			int indexK = contBus - 1 + busK.m_ordPQ;
+
+			for(int j = 0; j < busK.m_numBranches; j++) {
+				Branch_t dataBranch = busK.m_branches[j];
+				Bus_t busM;
+
+				if(busK.m_nin == dataBranch.m_ni) {
+					busM = busesV[dataBranch.m_nf - 1];
+				}
+
+				if(busK.m_nin == dataBranch.m_nf) {
+					busM = busesV[dataBranch.m_ni - 1];	
+				}
+
+				double theta_km = busK.m_ang - busM.m_ang;
+				double vK = busK.m_v;
+				double vM = busM.m_v;				
+				int k = busK.m_ord;
+
+				// dQk em relação a 'ak'
+				jac[indexK][k] += vK * vM *
+													( dataBranch.m_b * sin (theta_km) + dataBranch.m_g * cos (theta_km) );
+
+				// dQk em relaçao a 'am' (exceto quando m for a barra slack).
+				if (busM.m_tipo != SLACK)
+					{
+						int m = busM.m_ord;
+						jac [indexK][m] += vK * vM *
+															( dataBranch.m_g * cos (theta_km) + dataBranch.m_b * sin (theta_km) );
+					}
+
+				// dQk em relaçao a 'vk'
+				jac [indexK][indexK] += 2 * ( dataBranch.m_b + dataBranch.m_bsh ) *
+																			vK - vM *
+																			(dataBranch.m_b * cos (theta_km) - dataBranch.m_g * sin(theta_km));
+
+				// dQk em relacao a 'vm'
+				if (busM.m_tipo == PQ || busM.m_tipo == PV_TO_PQ)
+					{
+						int indexM = contBus - 1 + busM.m_ordPQ;
+						jac[indexK][indexM] += -1 * vK *
+																	( dataBranch.m_b * cos (theta_km) - dataBranch.m_g * sin (theta_km) );															
+					}
+
+				// dQk em relaçao a 'vk' (continuação)
+				jac[indexK][indexK] += (2 * busK.m_bsh * vK);
+			}
+		}
+	}	
 }
 
 #endif /* FLUXO_H_ */
