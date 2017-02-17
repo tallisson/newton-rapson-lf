@@ -95,6 +95,8 @@ int contBus = 0;
 int ord = 0;
 int posPQ = 0;
 int posPV = 0;
+int numPQ = 0;
+int numPV = 0;
 
 // Protótipos
 void criarBarra(int nin, int tipo, double v, double ang,
@@ -117,16 +119,16 @@ void criarBarra(int nin, int tipo, double v, double ang,
 	bus.m_qg = qg;
 	bus.m_numBranches = 0;
 
-	if(tipo != SLACK) {
-		bus.m_ord = ord++;
-	}
-
 	if(tipo == PQ) {
+		bus.m_ord = ord++;
 		bus.m_posPQ = posPQ++;
+		numPQ++;
 	}
 
 	if(tipo == PV) {
+		bus.m_ord = ord++;
 		bus.m_posPV = posPV++;
+		numPV++;
 	}
 
 	busesV[contBus++] = bus;

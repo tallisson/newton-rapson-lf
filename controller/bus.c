@@ -2,8 +2,9 @@
 
 int main(int argc, char * argv[]) {
 	criarBarra(1, SLACK, 1, 0, 0, 0, 0, 0);	
-	criarBarra(2, PV, 1, 0, 0, 0, 0, 0);	
-	for(int i = 0; i < 2; i++) {
+	criarBarra(2, PV, 1, 0, 0, 0, 0, 0);
+	int i;
+	for(i = 0; i < 2; i++) {
 		printf("Bus %d foi criada\n", busesV[i].m_nin);	
 	}
 
