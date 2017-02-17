@@ -16,12 +16,13 @@ void calcJac(void) {
 
 // Definição dos métodos
 void derivaP(double ** jac) {
-	for(int i = 0; i < contBus; i++) {
+	int i;
+	for(i = 0; i < contBus; i++) {
 		Bus_t busK = busesV[i];
 
 		if(busK.m_tipo != SLACK) {
-
-			for(int j = 0; j < busK.m_numBranches; j++) {
+			int j;
+			for(j = 0; j < busK.m_numBranches; j++) {
 				Branch_t dataBranch = busK.m_branches[j];
 				Bus_t busM;
 
@@ -70,13 +71,15 @@ void derivaP(double ** jac) {
 }
 
 void derivarQ(double ** jac) {
-	for(int i = 0; i < contBus; i++) {
+	int i;
+	for(i = 0; i < contBus; i++) {
 		Bus_t busK = busesV[i];
 
 		if(busK.m_tipo == PQ || busK.m_tipo == PV_TO_PQ) {
 			int indexK = contBus - 1 + busK.m_ordPQ;
 
-			for(int j = 0; j < busK.m_numBranches; j++) {
+			int j;
+			for(j = 0; j < busK.m_numBranches; j++) {
 				Branch_t dataBranch = busK.m_branches[j];
 				Bus_t busM;
 
