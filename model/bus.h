@@ -9,6 +9,7 @@
 #define PV 2
 #define PQ 0
 #define PV_TO_PQ 4
+#define BASE 100
 
 // Branch => linha de transmissão
 #define LT 0
@@ -114,10 +115,10 @@ void criarBarra(int nin, int tipo, double v, double ang,
 	bus.m_tipo = tipo;
 	bus.m_v = v;
 	bus.m_ang = ang;
-	bus.m_pc = pc;
-	bus.m_qc = qc;
-	bus.m_pg = pg;
-	bus.m_qg = qg;
+	bus.m_pc = pc / BASE;
+	bus.m_qc = qc / BASE;
+	bus.m_pg = pg / BASE;
+	bus.m_qg = qg / BASE;
 	bus.m_numBranches = 0;
 
 	if(tipo == PQ) {
@@ -144,7 +145,7 @@ void associarBarras(int indBusk, int indBusM, int tipo, int r, int x, int bsh) {
 	branch.m_x = x;
 	branch.m_g = r/(r*r+x*x);
 	branch.m_b = -x/(r*r+x*x);
-	branch.m_bsh = bsh;
+	branch.m_bsh = bsh  / 2;
 
 	Bus_t busK = busesV[indBusk-1];
 	busK.m_branches[busK.m_numBranches++] = branch;

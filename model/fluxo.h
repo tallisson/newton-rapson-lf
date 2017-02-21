@@ -4,18 +4,33 @@
 #include "bus.h"
 #include <math.h>
 
+#define LINHA  2
+#define COLUNA 3
+
 // Prototipos
-void calcP(void);
-void derivaP(double ** jac);
-void derivarQ(double ** jac);
+void calcJ(void);
+void Zeros(double * mat, int rows, int cols);
+void derivaP(double * jac, int rows, int cols);
+void derivarQ(double * jac, int rows, int cols);
 
-void calcJac(void) {
-	double jacobiana[2*numPQ + numPV][2*numPQ + numPV];
+void Zeros(double * mat, int rows, int cols) {
+	for(int i = 0; i < rows; i ++) {
+		for(int j = 0; j < cols; j++) {			
+			mat[i * cols + j] = 0.0;
+		}
+	}
+}
 
+void calcJ(void) {
+	int size = 2*numPQ + numPV;
+	double jac[size][size];
+	Zeros(jac[0], size, size);
+	derivaP(jac[0], size, size);
+	derivarQ(jac[0], size, size);
 }
 
 // Definição dos métodos
-void derivaP(double ** jac) {
+void derivaP(double * jac, int rows, int cols) {
 	int i;
 	for(i = 0; i < contBus; i++) {
 		Bus_t busK = busesV[i];
@@ -40,28 +55,28 @@ void derivaP(double ** jac) {
 				int k = busK.m_ord;
 
 				// dPk em relação a 'ak'
-				jac[k][k] += -1 * vK * vM * 
+				jac[k * cols + k] += -1 * vK * vM * 
 								(dataBranch.m_g * sin (theta_km) - dataBranch.m_b * cos (theta_km));
 				
 				// dPk em relação a 'am' (exceto quando m for a barra slack).								
 				if (busM.m_tipo != SLACK)
 					{
 						int m = busM.m_ord;
-						jac[k][m] += vK * vM *
+						jac[k * cols + m] += vK * vM *
 												( dataBranch.m_g * sin (theta_km) - dataBranch.m_b * cos (theta_km) );
 					}
 
 				// dPk em relação a 'vk'
 				if (busK.m_tipo == PQ || busK.m_tipo == PV_TO_PQ) {
 					int index = contBus - 1 + busK.m_ordPQ;
-					jac [k][index] += -2 * dataBranch.m_g * vK +
+					jac [k * cols + index] += -2 * dataBranch.m_g * vK +
 														vM * (dataBranch.m_g * cos (theta_km) + dataBranch.m_b * sin(theta_km));
 				}
 
 				// dPk em relação a 'vm'
 				if (busM.m_tipo == PQ || busM.m_tipo == PV_TO_PQ) {
 						int index = contBus - 1 + busM.m_ordPQ;
-						jac [k][index] += vK * ( dataBranch.m_g * cos (theta_km) + dataBranch.m_b * sin (theta_km) );
+						jac [k * cols + index] += vK * ( dataBranch.m_g * cos (theta_km) + dataBranch.m_b * sin (theta_km) );
 				}
 
 
@@ -70,7 +85,7 @@ void derivaP(double ** jac) {
 	}
 }
 
-void derivarQ(double ** jac) {
+void derivarQ(double * jac, int rows, int cols) {
 	int i;
 	for(i = 0; i < contBus; i++) {
 		Bus_t busK = busesV[i];
@@ -97,19 +112,19 @@ void derivarQ(double ** jac) {
 				int k = busK.m_ord;
 
 				// dQk em relação a 'ak'
-				jac[indexK][k] += vK * vM *
+				jac[indexK * cols + k] += vK * vM *
 													( dataBranch.m_b * sin (theta_km) + dataBranch.m_g * cos (theta_km) );
 
 				// dQk em relaçao a 'am' (exceto quando m for a barra slack).
 				if (busM.m_tipo != SLACK)
 					{
 						int m = busM.m_ord;
-						jac [indexK][m] += vK * vM *
+						jac [indexK * cols + m] += vK * vM *
 															( dataBranch.m_g * cos (theta_km) + dataBranch.m_b * sin (theta_km) );
 					}
 
 				// dQk em relaçao a 'vk'
-				jac [indexK][indexK] += 2 * ( dataBranch.m_b + dataBranch.m_bsh ) *
+				jac [indexK * cols + indexK] += 2 * ( dataBranch.m_b + dataBranch.m_bsh ) *
 																			vK - vM *
 																			(dataBranch.m_b * cos (theta_km) - dataBranch.m_g * sin(theta_km));
 
@@ -117,12 +132,12 @@ void derivarQ(double ** jac) {
 				if (busM.m_tipo == PQ || busM.m_tipo == PV_TO_PQ)
 					{
 						int indexM = contBus - 1 + busM.m_ordPQ;
-						jac[indexK][indexM] += -1 * vK *
+						jac[indexK * cols + indexM] += -1 * vK *
 																	( dataBranch.m_b * cos (theta_km) - dataBranch.m_g * sin (theta_km) );															
 					}
 
 				// dQk em relaçao a 'vk' (continuação)
-				jac[indexK][indexK] += (2 * busK.m_bsh * vK);
+				jac[indexK * cols + indexK] += (2 * busK.m_bsh * vK);
 			}
 		}
 	}	
