@@ -89,6 +89,9 @@ struct bus {
 	int m_ord;
 	Branch_t m_branches[MAX];
 	int m_numBranches;
+
+	int m_aCalc;
+	int m_vCalc;
 };
 typedef struct bus Bus_t;
 
@@ -99,12 +102,14 @@ int posPQ = 0;
 int posPV = 0;
 int numPQ = 0;
 int numPV = 0;
-
+int posSlack = 0;
 // Protótipos
 void criarBarra(int nin, int tipo, double v, double ang,
 		double pc, double qc, double pg, double qg);
 
 void associarBarras(int indBusk, int indBusM, int tipo, int r, int x, int bsh);
+
+void inicializarBarras(void);
 
 // Definição de métodos
 void criarBarra(int nin, int tipo, double v, double ang,
@@ -133,6 +138,10 @@ void criarBarra(int nin, int tipo, double v, double ang,
 		numPV++;
 	}
 
+	if(tipo == SLACK) {
+		posSlack = contBus;
+	}
+
 	busesV[contBus++] = bus;
 }
 
@@ -154,6 +163,21 @@ void associarBarras(int indBusk, int indBusM, int tipo, int r, int x, int bsh) {
 	Bus_t busM = (busesV[indBusM-1]);	
 	busM.m_branches[busM.m_numBranches++] = branch;
 	busesV[indBusM-1] = busM;
+}
+
+void inicializarBarras(void) {
+	int i;
+	for (i = 0; i < contBus; i++)
+		{
+			Bus_t busK = busesV[i];
+			if (busK.m_tipo != SLACK) {
+				busK.m_aCalc = busesV[posSlack].m_ang;
+			}
+
+			if (busK.m_tipo ->GetType() == Bus::LOAD) {
+				busK.m_vCalc = 1.0;
+			}
+		}
 }
 
 #endif /* BUS_H_ */
