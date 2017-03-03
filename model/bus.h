@@ -13,6 +13,7 @@
 
 // Branch => linha de transmissão
 #define LT 0
+#define TAP 1
 
 struct branch {
 	// Barra de saida
@@ -174,7 +175,7 @@ void inicializarBarras(void) {
 				busK.m_aCalc = busesV[posSlack].m_ang;
 			}
 
-			if (busK.m_tipo ->GetType() == Bus::LOAD) {
+			if (busK.m_tipo == PQ) {
 				busK.m_vCalc = 1.0;
 			}
 		}

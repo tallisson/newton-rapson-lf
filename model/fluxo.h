@@ -143,4 +143,170 @@ void derivarQ(double * jac, int rows, int cols) {
 	}	
 }
 
+void execute() {
+	/*
+	 * Calcular o vetor dos mismatches, a matriz Jacobiana e resolver
+	 * o sistema de equações lineares:
+	 */
+	inicializarBarras();
+
+	InitJ ();
+
+	m_b = m_mismatches->CalcMismatches(m_graph);
+
+	bool execute = false;
+	uint32_t nextIter, nextCrt;
+	nextCrt = 0;
+	do//while (execute)
+		{
+			nextIter = 0;
+			m_iter = 0;
+			while (nextIter == 0)
+				{
+					mat m = m_jac->CalcJac (m_graph);
+					vec dx = m_jac->SolveSys (m_b);
+					//std::cout << "dx = " << std::endl << dx << std::endl;
+
+					//std::cout << "Dx: \n" << dx << std::endl;
+					// Atualizar 'a' e 'V':
+
+					for (uint32_t i = 0; i < m_graph->GetNumBus(); i++)
+						{
+							Ptr<Bus> bus = m_graph->GetBus(i + 1);
+							if (bus->GetType() != Bus::SLACK)
+								{
+									DoubleValue ang;
+									bus->GetAttribute("ACalc", ang);
+									double angD = ang.Get();
+
+									angD += dx(bus->GetBus().m_ord);
+									//std::cout << "Ângulo Anterior " << ang.Get () << ", Atualização = " << dx (bus->GetBus ().m_ord) << " Novo Ângulo = " << angD << std::endl;
+									bus->SetAttribute("ACalc", DoubleValue(angD));
+								}
+
+							if (bus->GetType() != Bus::SLACK && bus->GetType() != Bus::GENERATION)
+								{
+									DoubleValue v;
+									bus->GetAttribute("VCalc", v);
+									double vD = v.Get();
+
+									uint32_t ind = m_graph->GetNumBus() - 1 + bus->GetBus().m_ordPQ;
+									vD += dx(ind);
+									//std::cout << "Mag. Tensão Anterior " << v.Get () << ", Atualização = " << dx (ind) << ", Nova Mag. Tensão = " << vD << std::endl;
+									bus->SetAttribute("VCalc", DoubleValue(vD));
+								}
+						}
+						bool crt = false;
+						if (m_qControl != NULL)
+							{
+								crt = m_qControl->GetObject<QControl> ()->DoRestore (m_graph);
+								if (crt == true)
+									{
+										InitJ ();
+									}
+							}
+
+
+						m_iter++;
+
+						// Qlim
+						std::cout << "Iter " << m_iter << std::endl;
+						if (m_qControl != NULL)
+							{
+								crt = m_qControl->GetObject<QControl> ()->DoControl (m_graph);
+								if (crt == true)
+									{
+										InitJ ();
+									}
+							}
+
+						/*
+						 * Cálculo do vetor dos mismatches com os valores corrigidos de
+						 * 'a' e 'V':
+						 */
+						m_b = m_mismatches->CalcMismatches(m_graph);
+						//std::cout << "Erros: \n" << b;
+						std::cout << "+++++++++++++++++++++++++++++++++++++++++\n";
+						for (uint32_t i = 0; i < m_graph->GetNumBus(); i++)
+							{
+								Ptr<Bus> bus = m_graph->GetBus(i + 1);
+								//bus->Print();
+							}
+						// Teste de convergência:
+
+						double maxB = max(abs(m_b));
+
+						if (maxB <= m_precision)
+							{
+								nextIter = 1;
+							}
+						else
+							{
+								m_jac->Zeros();
+								nextIter = 0;
+
+								// Critério de saída do laço:
+								if (m_iter == m_maxIter)
+									{
+										nextIter = 2;
+									}
+							}
+							if(nextIter != 0)
+								{
+									CalcLosses();
+									m_report->StoreData (m_graph, m_sts.m_baseMVA);
+									m_report->StoreL (m_totalL);
+								}
+				}
+
+			if(m_vControl != NULL)
+				{
+					execute = false;
+					if (nextCrt < 20)
+						{
+							execute = m_vControl->DoControl (m_jac->GetJqv (), m_graph);
+							/*std::ostringstream os;
+							os << nextCrt;
+							std::ofstream fileJ1, fileJ2, fileJ3, fileJ4;
+
+							std::string j1F = "/home/thiago/pwns-ns-3/resultados-fluxo/j1_";
+							std::string j2F = "/home/thiago/pwns-ns-3/resultados-fluxo/j2_";
+							std::string j3F = "/home/thiago/pwns-ns-3/resultados-fluxo/j3_";
+							std::string j4F = "/home/thiago/pwns-ns-3/resultados-fluxo/j4_";
+
+							std::cout << j1F.append(os.str()).append(".txt") << std::endl;
+
+							fileJ1.open(j1F.append(os.str()).append(".txt").c_str());
+							fileJ2.open(j2F.append(os.str()).append(".txt").c_str());
+							fileJ3.open(j3F.append(os.str()).append(".txt").c_str());
+							fileJ4.open(j4F.append(os.str()).append(".txt").c_str());
+
+							fileJ1 << m_jac->GetJ1();
+							fileJ2 << m_jac->GetJ2();
+							fileJ3 << m_jac->GetJ3();
+							fileJ4 << m_jac->GetJ4();
+
+							fileJ1.close();
+							fileJ2.close();
+							fileJ3.close();
+							fileJ4.close();*/
+						}
+				}
+			if (execute == true)
+				{
+					nextCrt++;
+				}
+		} while (execute);
+
+	if (nextIter == 1)
+		{
+			printf("%s\n", "O método de Newton-Raphson convergiu em ");
+		}
+	else
+		{
+			printf("%s\n", O número máximo de iterações foi atingido e o método de Newton-Raphson não convergiu...");
+		}
+}
+
+
 #endif /* FLUXO_H_ */
